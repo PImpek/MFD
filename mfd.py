@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2012, Bartosz Foder, (bartosz@foder.pl)
+# Copyright (c) 2012-2013, Bartosz Foder, (bartosz@foder.pl)
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without modification,
@@ -36,7 +36,7 @@ EVT_DU = wx.NewEventType()
 EVT_DUP = wx.PyEventBinder(EVT_DU, 1)
 
 def findList(url):
-  site = urllib.urlopen(url).read()
+	site = urllib.urlopen(url).read()
 	list = re.findall(r"\W+<li><a href=\"((?:https?://)?(?:[\da-z\.\-/\_]+))\"\s+rel=\"\d+\" class=\"(?:[a-z_]+ [a-z_]+)\">([0-9a-zA-Z\ \.\\/\-\_\+=]+)</a></li>",site)
 	
 	saveList(list)
@@ -87,9 +87,16 @@ class sf(wx.Frame):
 
 		titlebtn = wx.Button(self,label='Get list of Chapters')
 		vbox.Add(titlebtn,flag=wx.EXPAND|wx.ALL,border=5)
-
+		
+		hbox = wx.BoxSizer(wx.HORIZONTAL)
 		self.ChaptersLB = wx.CheckListBox(self,style=wx.LC_REPORT,size=(800,400))
-		vbox.Add(self.ChaptersLB,flag=wx.EXPAND|wx.ALL,border=5,proportion=0)
+		selall = wx.Button(self, label='Select All')
+		
+		
+		hbox.Add(self.ChaptersLB,flag=wx.EXPAND|wx.ALL,border=5,proportion=0)
+		hbox.Add(selall,flag=wx.EXPAND|wx.ALL,border=5,proportion=0)
+		
+		vbox.Add(hbox,flag=wx.ALL,border=5)
 
 		downlbtn = wx.Button(self, label='Download Chapters')
 		vbox.Add(downlbtn,flag=wx.EXPAND|wx.ALL,border=5)
@@ -98,6 +105,7 @@ class sf(wx.Frame):
 		self.Bind(wx.EVT_BUTTON,self.downloadChapters,downlbtn)
 		self.Bind(wx.EVT_BUTTON,self.getChapters,titlebtn)
 		self.Bind(wx.EVT_BUTTON,self.refresh,refbtn)
+		self.Bind(wx.EVT_BUTTON,self.selectAll,selall)
 
 		self.SetSizerAndFit(vbox)
 		self.SetAutoLayout(True)
@@ -132,6 +140,9 @@ class sf(wx.Frame):
 
 		self.chapters = findChapters(churl)
 		self.ChaptersLB.Set([ch[1]+'\t('+ch[0]+')'for ch in self.chapters])
+	
+	def selectAll(self,evt):
+		self.ChaptersLB.SetChecked(range(self.ChaptersLB.GetCount()))
 	
 	def updateProgress(self,evt):
 		print evt.GetValue()
